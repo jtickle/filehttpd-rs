@@ -14,43 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with filehttpd-rs. If not, see <http://www.gnu.org/licenses/>.
 
-use tokio::io::{BufReader, AsyncBufReadExt, BufWriter, AsyncWriteExt};
-use tokio::net::{TcpListener, TcpStream};
+use tokio::net::TcpListener;
 use anyhow::Result;
-use tracing::{error, info, trace};
-
-async fn handle_client(mut socket: TcpStream, _con_no: u64) -> Result<()> {
-    let (read_half, write_half) = socket.split();
-    let mut reader = BufReader::new(read_half);
-    let mut writer = BufWriter::new(write_half);
-
-    loop {
-        let mut line = String::new();
-        let len = reader.read_line(&mut line).await?;
-
-        if len == 0 {
-            info!("Connection closed");
-            break;
-        }
-
-        trace!("STREAM ({}): {:#?}", len, line);
-
-        if line == "\r\n" {
-            info!("Sending response...");
-            writer.write(b"HTTP/1.1 200 OK\r\n").await?;
-            writer.write(b"Content-Type: text/html\r\n").await?;
-            writer.write(b"\r\n").await?;
-            writer.write(b"Hello there!\r\n").await?;
-            writer.flush().await?;
-            break;
-        }
-    }
-
-    Ok(())
-}
+use tracing::{error, info};
+use filehttpd::{Config, handle_client};
 
 #[tokio::main]
 async fn main() -> Result<()> {
+
+    let config = Config::build();
     // Set up Tracing
     let subscriber = tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
@@ -64,10 +36,11 @@ async fn main() -> Result<()> {
     loop {
         let (socket, addr) = listener.accept().await?;
         let con_no = con_count;
+        let cfg = config.clone();
         con_count += 1;
         tokio::spawn(async move {
             info!("Connection received from peer {}", addr);
-            match handle_client(socket, con_no).await {
+            match handle_client(&cfg, socket, con_no).await {
                 Ok(()) => {}
                 Err(err) => {
                     error!("Error processing request from {}: {}", addr, err);
