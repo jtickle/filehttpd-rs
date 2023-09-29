@@ -20,6 +20,22 @@ use tokio::net::TcpStream;
 use tracing::{warn, info, trace};
 use anyhow::Result;
 
+pub enum HttpMethod {
+    GET,
+    HEAD,
+//    POST,
+//    PUT,
+//    DELETE,
+//    CONNECT,
+//    OPTIONS,
+//    TRACE
+}
+
+pub enum HttpVersion {
+    OneOh,
+    OneOne,
+}
+
 #[derive(Debug, Clone)]
 pub struct Config {
     pub web_root: String,
