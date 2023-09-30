@@ -20,6 +20,9 @@ use tokio::net::TcpStream;
 use tracing::{warn, info, trace};
 use anyhow::Result;
 
+pub mod request;
+
+#[derive(Debug, Clone)]
 pub enum HttpMethod {
     GET,
     HEAD,
@@ -31,6 +34,7 @@ pub enum HttpMethod {
 //    TRACE
 }
 
+#[derive(Debug, Clone)]
 pub enum HttpVersion {
     OneOh,
     OneOne,
