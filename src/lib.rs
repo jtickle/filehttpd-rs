@@ -22,7 +22,7 @@ use anyhow::Result;
 
 pub mod request;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum HttpMethod {
     GET,
     HEAD,
@@ -34,7 +34,7 @@ pub enum HttpMethod {
 //    TRACE
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum HttpVersion {
     OneOh,
     OneOne,
